@@ -1,31 +1,35 @@
-import React, { useState } from "react";
-
+import { useState } from "react";
+import getRecipeFromChefClaude from "../ai.js";
+import IngredientsList from "./IngredientsList";
+import Recipe from "./Recipe";
 export default function Main() {
   const [ingredients, setIngredients] = useState([]);
-  const ingredientsListItems = ingredients.map((ingredient, index) => (
-    <li key={index}>{ingredient}</li>
-  ));
+  const [recipe, setRecipe] = useState("");
 
-  function handleSubmit(event) {
-    event.preventDefault();
-    const formData = new FormData(event.currentTarget);
+  function addIngredient(formData) {
     const newIngredient = formData.get("ingredient");
-    console.log(newIngredient);
     setIngredients((prevIngredients) => [...prevIngredients, newIngredient]);
+  }
+
+  async function getRecipe() {
+    const recipe = await getRecipeFromChefClaude(ingredients);
+    setRecipe(recipe);
   }
 
   return (
     <main>
-      <form onSubmit={handleSubmit} className="form-container">
+      <form action={addIngredient} className="form-container">
         <input
           type="text"
           className="ingredient"
           placeholder="e.g. oregano"
           name="ingredient"
+          required
         />
         <button className="btn add-btn">Add ingredient</button>
       </form>
-      <ul>{ingredientsListItems}</ul>
+      <IngredientsList ingredients={ingredients} getRecipe={getRecipe} />
+      {recipe && <Recipe recipe={recipe} />}
     </main>
   );
 }
